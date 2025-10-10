@@ -1,0 +1,86 @@
+import React from "react";
+import Login from "./Login";
+import DatabaseTest from "./DatabaseTest";
+
+function App() {
+  return (
+    <div>
+      <Login />
+      <DatabaseTest />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+// src/DatabaseTest.js
+import React, { useEffect } from "react";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+
+function DatabaseTest() {
+  // Add a new document
+  const addUser = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "users"), {
+        name: "Jeyashunmugaraja",
+        email: "jeya@example.com",
+        createdAt: new Date()
+      });
+      console.log("Document written with ID:", docRef.id);
+    } catch (error) {
+      console.error("Error adding document:", error);
+    }
+  };
+
+  // Fetch documents
+  const fetchUsers = async () => {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} =>`, doc.data());
+    });
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  return (
+    <div>
+      <h2>Firestore Database Example</h2>
+      <button onClick={addUser}>Add User</button>
+    </div>
+  );
+}
+
+export default DatabaseTest;
+
+
+
+
+// src/firebase.js
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore"; // ✅ Import Firestore
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAa0Z6I-MaU8GP7_WAlpXZ_dgAbfYcExNw",
+  authDomain: "projectfr023.firebaseapp.com",
+  projectId: "projectfr023",
+  storageBucket: "projectfr023.firebasestorage.app",
+  messagingSenderId: "424028379405",
+  appId: "1:424028379405:web:fe96b44b4d1e8b47cbf844",
+  measurementId: "G-EDCR3WLCNH"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Export Authentication and Firestore instances
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+export const db = getFirestore(app); // ✅ Firestore instance

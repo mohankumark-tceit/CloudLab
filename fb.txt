@@ -132,3 +132,117 @@ export default App;
 
 
 At last run npm start
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 🚀 **Firebase Hosting Setup (Step-by-Step)**
+
+#### **1️⃣ Build your React app**
+
+Once your app works fine with `npm start`, build it for production:
+
+```bash
+npm run build
+```
+
+✅ This will create a `build/` folder with optimized files.
+
+---
+
+#### **2️⃣ Install Firebase CLI**
+
+If not installed yet, install Firebase tools globally:
+
+```bash
+npm install -g firebase-tools
+```
+
+Check if installed correctly:
+
+```bash
+firebase --version
+```
+
+---
+
+#### **3️⃣ Login to Firebase**
+
+Login using your Google account:
+
+```bash
+firebase login
+```
+
+It will open your browser → choose the same Google account you used for the Firebase project.
+
+---
+
+#### **4️⃣ Initialize Firebase Hosting**
+
+Inside your React project folder, run:
+
+```bash
+firebase init
+```
+
+When prompted:
+
+* **Select Hosting** → press Spacebar to select, then Enter
+* **Use existing project** → choose `projectfr023` (the one you created)
+* **Public directory:**
+  Type:
+
+  ```
+  build
+  ```
+* **Configure as a single-page app (rewrite all URLs to /index.html)?**
+  → Type `y`
+* **Set up automatic builds and deploys with GitHub?**
+  → Type `n` (skip for now)
+
+This creates two files:
+
+```
+firebase.json
+.firebaserc
+```
+
+---
+
+#### **5️⃣ Deploy your app**
+
+Now deploy to Firebase Hosting:
+
+```bash
+firebase deploy
+```
+
+After a few seconds, it will show:
+
+```
+✔ Deploy complete!
+
+Project Console: https://console.firebase.google.com/project/projectfr023/overview
+Hosting URL: https://projectfr023.web.app
+
+
+
+

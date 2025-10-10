@@ -1,121 +1,286 @@
-Setup and Run OpenMP in C (on Windows)
-1.Step 1: Install MinGW-w64 (GCC compiler for Windows)
-🔗 Download Link (official):
-https://sourceforge.net/projects/mingw-w64/files/latest/download
+Perfect 👍 — let’s go through **OpenMPI** and **MPI (Message Passing Interface)** — what they are, how they work, and then how to **install and run MPI programs** step-by-step on **Ubuntu** for **single-node** and **multi-node** setups.
 
-Click Next → installation takes a few minutes.
+---
 
-Step 2: Add MinGW to PATH
+# 🧠 1. WHAT IS MPI?
 
-Open Start Menu → search “Environment Variables” → open it.
+**MPI (Message Passing Interface)** is a **standard** for **parallel programming** — used to run the same program across multiple processes that communicate via **messages**.
 
-Click Environment Variables → Path → Edit → New
+It allows computers (or cores) to:
 
-Add your bin path:
+* Share data,
+* Coordinate tasks,
+* Run large computations in parallel.
 
-C:\mingw-w64\mingw64\bin
+---
 
+# ⚙️ 2. WHAT IS OPENMPI?
 
-Click OK → OK → OK to save.
+**OpenMPI** is a **popular open-source implementation** of the MPI standard.
+It’s a library that lets you run your C, C++, or Fortran programs using MPI functions.
 
-step 3 : gcc --version
+There are other implementations like:
 
-Step 4: Test OpenMP Program
+* MPICH
+* Intel MPI
 
-Create a file named omp_hello.c:
+But **OpenMPI** is the most widely used in labs and clusters.
 
-#include <stdio.h>
-#include <omp.h>
+---
 
-int main() {
-    #pragma omp parallel
-    {
-        int tid = omp_get_thread_num();
-        int nthreads = omp_get_num_threads();
-        printf("Hello from thread %d out of %d threads\n", tid, nthreads);
-    }
-    return 0;
-}
+# 💻 3. INSTALL OPENMPI ON UBUNTU (Single Node)
 
-5.Run in PowerShell:
+Follow these steps carefully 👇
 
-gcc -fopenmp omp_hello.c -o omp_hello.exe
+---
 
-Step 6: Run the Program
+## 🔹 Step 1: Update and Install
 
-Execute:
+```bash
+sudo apt update
+sudo apt install openmpi-bin openmpi-common libopenmpi-dev -y
+```
 
-.\omp_hello.exe
+✅ Check installation:
 
+```bash
+mpicc --version
+```
 
-PART 2 — Setup and Run MPI in C (on Windows)
-Step 1: Download and Install Microsoft MPI
+Output example:
 
-https://www.microsoft.com/en-us/download/details.aspx?id=105289&utm_source=chatgpt.com
+```
+mpicc (Open MPI) 4.1.5
+```
 
+---
 
-MS-MPI SDK (headers + libs):
-Same page, scroll down → choose MSMpiSdk.msi
+## 🔹 Step 2: Create a Sample MPI Program
 
+Create file:
 
-After install, you should have paths like:
+```bash
+nano hello_mpi.c
+```
 
-C:\Program Files\Microsoft MPI\
-C:\Program Files (x86)\Microsoft SDKs\MPI\
+Paste:
 
-
-
-Step 3: Write MPI Code
-
-Create a file mpi_hello.c:
-
+```c
 #include <mpi.h>
 #include <stdio.h>
 
 int main(int argc, char** argv) {
-    MPI_Init(&argc, &argv);
-    
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    
+    MPI_Init(NULL, NULL);  // Initialize MPI
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    
-    printf("Hello from process %d of %d\n", world_rank, world_size);
-    
-    MPI_Finalize();
-    return 0;
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+
+    printf("Hello from processor %s, rank %d out of %d processors\n",
+           processor_name, world_rank, world_size);
+
+    MPI_Finalize();  // Finalize MPI
 }
+```
 
-https://visualstudio.microsoft.com/vs/community/
-Step 4: Compile the MPI Program
+---
 
-In the x64 Native Tools Command Prompt, run:
+## 🔹 Step 3: Compile the Program
 
-cl /I"C:\Program Files (x86)\Microsoft SDKs\MPI\Include" mpi_hello.c /link /LIBPATH:"C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64" msmpi.lib
+```bash
+mpicc hello_mpi.c -o hello_mpi
+```
 
+---
+
+## 🔹 Step 4: Run the Program
+
+Run with **4 processes**:
+
+```bash
+mpirun -np 4 ./hello_mpi
+```
 
 ✅ Output:
-This generates mpi_hello.exe.
 
-Step 5: Run the MPI Program
+```
+Hello from processor ubuntu, rank 0 out of 4 processors
+Hello from processor ubuntu, rank 1 out of 4 processors
+Hello from processor ubuntu, rank 2 out of 4 processors
+Hello from processor ubuntu, rank 3 out of 4 processors
+```
 
-Execute with multiple processes:
+---
 
-mpiexec -n 4 mpi_hello.exe
+# 🌐 4. MULTI-NODE OPENMPI CLUSTER (Multiple Machines)
 
+Now let’s run the **same MPI program** on multiple computers (nodes).
 
+---
 
+## 🖥️ Cluster Setup Example
 
+| Node   | Role            | IP Address    |
+| ------ | --------------- | ------------- |
+| master | Controller node | 192.168.1.100 |
+| node1  | Worker 1        | 192.168.1.101 |
+| node2  | Worker 2        | 192.168.1.102 |
 
+---
 
+## 🔹 Step 1: Install OpenMPI on All Nodes
 
+Run on **each machine**:
 
+```bash
+sudo apt update
+sudo apt install openmpi-bin openmpi-common libopenmpi-dev -y
+```
 
+---
 
+## 🔹 Step 2: Enable SSH Access Between Nodes
 
+On the **master node**:
 
+```bash
+ssh-keygen -t rsa -P ""
+ssh-copy-id user@node1
+ssh-copy-id user@node2
+```
 
+✅ Test:
 
+```bash
+ssh node1
+ssh node2
+```
 
+You should log in **without a password**.
 
+---
+
+## 🔹 Step 3: Share Your Program
+
+From master:
+
+```bash
+scp hello_mpi user@node1:/home/user/
+scp hello_mpi user@node2:/home/user/
+```
+
+---
+
+## 🔹 Step 4: Create a Host File
+
+On master:
+
+```bash
+nano hosts.txt
+```
+
+Add:
+
+```
+master slots=2
+node1 slots=2
+node2 slots=2
+```
+
+---
+
+## 🔹 Step 5: Run MPI Program Across Nodes
+
+On master:
+
+```bash
+mpirun -np 6 --hostfile hosts.txt ./hello_mpi
+```
+
+✅ Example Output:
+
+```
+Hello from processor master, rank 0 out of 6 processors
+Hello from processor node1, rank 1 out of 6 processors
+Hello from processor node2, rank 2 out of 6 processors
+Hello from processor node1, rank 3 out of 6 processors
+Hello from processor master, rank 4 out of 6 processors
+Hello from processor node2, rank 5 out of 6 processors
+```
+
+---
+
+# 🧩 5. COMMON MPI COMMANDS
+
+| Command                              | Description                      |
+| ------------------------------------ | -------------------------------- |
+| `mpicc file.c -o file`               | Compile MPI program              |
+| `mpirun -np N ./file`                | Run with N processes             |
+| `mpirun --hostfile hosts.txt ./file` | Run across nodes                 |
+| `mpiexec`                            | Same as `mpirun`                 |
+| `ompi_info`                          | Check OpenMPI config and version |
+
+---
+
+# ⚡ 6. BONUS: TEST PARALLEL SUM PROGRAM
+
+Here’s a simple parallel addition example:
+
+```c
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    int rank, size, n = 10;
+    int arr[10] = {1,2,3,4,5,6,7,8,9,10};
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    int local_sum = 0;
+    for (int i = rank; i < n; i += size)
+        local_sum += arr[i];
+
+    int total_sum = 0;
+    MPI_Reduce(&local_sum, &total_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0)
+        printf("Total Sum = %d\n", total_sum);
+
+    MPI_Finalize();
+}
+```
+
+Compile & run:
+
+```bash
+mpicc sum.c -o sum
+mpirun -np 4 ./sum
+```
+
+✅ Output:
+
+```
+Total Sum = 55
+```
+
+---
+
+# ✅ MPI SUMMARY
+
+| Feature           | Description                   |
+| ----------------- | ----------------------------- |
+| Library           | OpenMPI                       |
+| Programming Model | Distributed (message passing) |
+| Languages         | C, C++, Fortran               |
+| Run Mode          | Single or Multi-node          |
+| Key Commands      | `mpicc`, `mpirun`, `mpiexec`  |
+
+---
+
+Would you like me to give you a **shell script (`install_openmpi.sh`)** that automatically installs OpenMPI and runs a sample program on Ubuntu?
+It’ll save time for lab setup and testing.

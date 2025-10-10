@@ -1,0 +1,307 @@
+Perfect 🔥 — let’s go step-by-step to **install and configure Apache Spark** on **Ubuntu**, for both **single-node** and **multi-node clusters**.
+
+---
+
+# 🧩 WHAT IS SPARK?
+
+**Apache Spark** is an open-source distributed processing system for **big data analytics**, built for speed and ease of use.
+It runs on top of **Hadoop HDFS** or standalone.
+
+---
+
+# ⚙️ PART 1: INSTALL SPARK ON UBUNTU (Single Node)
+
+---
+
+## 🔹 Step 1: Update System and Install Java
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install openjdk-11-jdk -y
+java -version
+```
+
+✅ Output:
+
+```
+openjdk version "11.0.xx"
+```
+
+---
+
+## 🔹 Step 2: Install Scala (Spark uses Scala internally)
+
+```bash
+sudo apt install scala -y
+scala -version
+```
+
+✅ Output should show version like `2.11.x` or `2.12.x`
+
+---
+
+## 🔹 Step 3: Download and Install Apache Spark
+
+```bash
+cd /opt
+sudo wget https://downloads.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+sudo tar -xvf spark-3.5.1-bin-hadoop3.tgz
+sudo mv spark-3.5.1-bin-hadoop3 /usr/local/spark
+sudo chown -R $USER:$USER /usr/local/spark
+```
+
+---
+
+## 🔹 Step 4: Set Environment Variables
+
+Edit your bash profile:
+
+```bash
+nano ~/.bashrc
+```
+
+Add at the end:
+
+```bash
+export SPARK_HOME=/usr/local/spark
+export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+```
+
+Apply:
+
+```bash
+source ~/.bashrc
+```
+
+---
+
+## 🔹 Step 5: Test Spark Installation
+
+Run:
+
+```bash
+spark-shell
+```
+
+✅ You’ll enter Spark interactive Scala shell with messages like:
+
+```
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 3.5.1
+      /_/
+```
+
+Exit:
+
+```scala
+:quit
+```
+
+---
+
+## 🔹 Step 6: Run PySpark (Python Interface)
+
+Install Python and PySpark:
+
+```bash
+sudo apt install python3-pip -y
+pip install pyspark
+```
+
+Run:
+
+```bash
+pyspark
+```
+
+✅ Opens an interactive Python shell:
+
+```
+>>> spark
+<pyspark.sql.session.SparkSession object at ...>
+```
+
+Try a small example:
+
+```python
+data = [("John", 30), ("Sara", 28), ("Mike", 35)]
+df = spark.createDataFrame(data, ["Name", "Age"])
+df.show()
+```
+
+---
+
+## 🔹 Step 7: Run Spark Web UI
+
+By default Spark UI runs on:
+👉 **[http://localhost:4040](http://localhost:4040)**
+
+---
+
+## 🔹 Step 8: Optional — Integrate Spark with Hadoop
+
+If Hadoop is already installed:
+
+1. Ensure `$HADOOP_HOME` and `$JAVA_HOME` are set.
+2. Add Hadoop config to Spark:
+
+   ```bash
+   cp $HADOOP_HOME/etc/hadoop/* $SPARK_HOME/conf/
+   ```
+3. Rebuild environment:
+
+   ```bash
+   source ~/.bashrc
+   ```
+
+---
+
+# ⚙️ PART 2: MULTI-NODE SPARK CLUSTER (Standalone Mode)
+
+---
+
+## 🖥️ Cluster Setup Example
+
+| Node    | Role         | Example IP    |
+| ------- | ------------ | ------------- |
+| Master  | Spark Master | 192.168.1.100 |
+| Worker1 | Spark Worker | 192.168.1.101 |
+| Worker2 | Spark Worker | 192.168.1.102 |
+
+---
+
+## 🔹 Step 1: Repeat Installation
+
+Do Steps 1–4 on **all nodes** (Java, Scala, Spark install, environment setup).
+
+---
+
+## 🔹 Step 2: Configure SSH (for Master to Workers)
+
+On **Master node**:
+
+```bash
+ssh-keygen -t rsa -P ""
+ssh-copy-id user@worker1
+ssh-copy-id user@worker2
+```
+
+✅ Test passwordless SSH:
+
+```bash
+ssh worker1
+ssh worker2
+```
+
+---
+
+## 🔹 Step 3: Configure Spark Cluster
+
+Edit on Master:
+
+```bash
+cd $SPARK_HOME/conf
+cp spark-env.sh.template spark-env.sh
+nano spark-env.sh
+```
+
+Add:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export SPARK_MASTER_HOST='master'
+export SPARK_WORKER_CORES=2
+export SPARK_WORKER_MEMORY=2g
+```
+
+---
+
+### Configure Workers
+
+```bash
+cp workers.template workers
+nano workers
+```
+
+Add:
+
+```
+worker1
+worker2
+```
+
+Copy this config folder to workers:
+
+```bash
+scp -r $SPARK_HOME/conf user@worker1:$SPARK_HOME/
+scp -r $SPARK_HOME/conf user@worker2:$SPARK_HOME/
+```
+
+---
+
+## 🔹 Step 4: Start the Cluster
+
+On Master:
+
+```bash
+start-master.sh
+```
+
+Check URL:
+👉 [http://master:8080](http://master:8080)
+
+Then on each Worker:
+
+```bash
+start-worker.sh spark://master:7077
+```
+
+✅ You’ll see the workers appear on the Master Web UI.
+
+---
+
+## 🔹 Step 5: Submit a Spark Job
+
+From Master:
+
+```bash
+$SPARK_HOME/bin/spark-submit \
+  --master spark://master:7077 \
+  --class org.apache.spark.examples.SparkPi \
+  $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.1.jar 10
+```
+
+✅ Output will show something like:
+
+```
+Pi is roughly 3.1415927
+```
+
+---
+
+## 🔹 Step 6: Stop the Cluster
+
+```bash
+stop-worker.sh
+stop-master.sh
+```
+
+---
+
+# ✅ Spark Cluster Summary
+
+| Component            | Default Port | Description                 |
+| -------------------- | ------------ | --------------------------- |
+| Spark Master Web UI  | 8080         | Monitor cluster             |
+| Spark Worker Web UI  | 8081+        | Worker info                 |
+| Spark Application UI | 4040         | Job details                 |
+| Spark Master Service | 7077         | Cluster connection endpoint |
+
+---
+
+Would you like me to give you a **ready-to-run shell script (`spark_setup.sh`)** that installs and configures Spark automatically (single-node version)?
+You can just run it and have Spark ready in 2–3 minutes.

@@ -1,0 +1,71 @@
+Here’s a simple **Python program** that connects to a **MongoDB Atlas cluster**, inserts a document, retrieves data, and prints it — using the `pymongo` library 👇
+
+---
+
+### 🧠 Prerequisites
+
+1. You must have a **MongoDB Atlas cluster** set up ([https://cloud.mongodb.com/](https://cloud.mongodb.com/)).
+2. Copy your **connection string** from the Atlas UI, e.g.
+
+   ```
+   mongodb+srv://<username>:<password>@cluster0.abcd.mongodb.net/
+   ```
+3. Install `pymongo`:
+
+   ```bash
+   pip install pymongo
+   ```
+
+---
+
+### 🐍 Python Code — `mongo_connect.py`
+
+```python
+from pymongo import MongoClient
+
+# Replace with your own MongoDB connection string
+uri = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority"
+
+# Connect to MongoDB
+client = MongoClient(uri)
+
+# Create or connect to a database
+db = client["mydatabase"]
+
+# Create or connect to a collection (like a table)
+collection = db["students"]
+
+# Example document to insert
+student_doc = {
+    "name": "John Doe",
+    "age": 21,
+    "course": "Computer Science"
+}
+
+# Insert one document
+insert_result = collection.insert_one(student_doc)
+print(f"Inserted document ID: {insert_result.inserted_id}")
+
+# Fetch all documents
+print("\nAll students:")
+for student in collection.find():
+    print(student)
+
+# Close connection
+client.close()
+```
+
+---
+
+### ✅ Output Example
+
+```
+Inserted document ID: 670755fbc45f1e2c12345678
+
+All students:
+{'_id': ObjectId('670755fbc45f1e2c12345678'), 'name': 'John Doe', 'age': 21, 'course': 'Computer Science'}
+```
+
+---
+
+Would you like me to extend this example to include **CRUD operations (Create, Read, Update, Delete)** on the MongoDB cluster too?

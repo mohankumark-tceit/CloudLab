@@ -1,0 +1,134 @@
+create a folder
+npx create-react-app .
+create firebase.js & Login,js under src and replace app.js with below code
+
+go to firebase website , create project under project settings register web and take config line
+and under build go to authentication enable google,email&password authentication
+
+run npm install firebase
+
+
+
+
+
+// src/firebase.js
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAa0Z6I-MaU8GP7_WAlpXZ_dgAbfYcExNw",
+  authDomain: "projectfr023.firebaseapp.com",
+  projectId: "projectfr023",
+  storageBucket: "projectfr023.firebasestorage.app",
+  messagingSenderId: "424028379405",
+  appId: "1:424028379405:web:fe96b44b4d1e8b47cbf844",
+  measurementId: "G-EDCR3WLCNH"
+};
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
+
+
+
+
+// src/Login.js
+import React, { useState } from "react";
+import { auth, googleProvider } from "./firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Logged in ✅");
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("Account created 🎉");
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      alert("Signed in with Google 🚀");
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h2>{isLogin ? "Login" : "Register"}</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+        /><br /><br />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+        /><br /><br />
+        <button type="submit">{isLogin ? "Login" : "Sign Up"}</button>
+      </form>
+
+      <hr style={{ width: "200px", margin: "20px auto" }} />
+
+      <button onClick={handleGoogleLogin}>Sign in with Google</button>
+
+      <p>
+        {isLogin ? "New user?" : "Already have an account?"}{" "}
+        <button onClick={() => setIsLogin(!isLogin)}>
+          {isLogin ? "Register" : "Login"}
+        </button>
+      </p>
+    </div>
+  );
+}
+
+export default Login;
+
+
+
+
+
+
+// src/App.js
+import React from "react";
+import Login from "./Login";
+
+function App() {
+  return (
+    <div>
+      <Login />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+
+
+At last run npm start

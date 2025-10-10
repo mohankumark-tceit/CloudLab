@@ -1,0 +1,5 @@
+1. https://sourceforge.net/projects/cloudanalystnetbeans/postdownload
+2. https://netbeans.apache.org/front/main/download/
+3.open 1 in netbeans(2)
+4.click greenbutton
+5.

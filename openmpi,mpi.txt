@@ -1,0 +1,121 @@
+Setup and Run OpenMP in C (on Windows)
+1.Step 1: Install MinGW-w64 (GCC compiler for Windows)
+🔗 Download Link (official):
+https://sourceforge.net/projects/mingw-w64/files/latest/download
+
+Click Next → installation takes a few minutes.
+
+Step 2: Add MinGW to PATH
+
+Open Start Menu → search “Environment Variables” → open it.
+
+Click Environment Variables → Path → Edit → New
+
+Add your bin path:
+
+C:\mingw-w64\mingw64\bin
+
+
+Click OK → OK → OK to save.
+
+step 3 : gcc --version
+
+Step 4: Test OpenMP Program
+
+Create a file named omp_hello.c:
+
+#include <stdio.h>
+#include <omp.h>
+
+int main() {
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        int nthreads = omp_get_num_threads();
+        printf("Hello from thread %d out of %d threads\n", tid, nthreads);
+    }
+    return 0;
+}
+
+5.Run in PowerShell:
+
+gcc -fopenmp omp_hello.c -o omp_hello.exe
+
+Step 6: Run the Program
+
+Execute:
+
+.\omp_hello.exe
+
+
+PART 2 — Setup and Run MPI in C (on Windows)
+Step 1: Download and Install Microsoft MPI
+
+https://www.microsoft.com/en-us/download/details.aspx?id=105289&utm_source=chatgpt.com
+
+
+MS-MPI SDK (headers + libs):
+Same page, scroll down → choose MSMpiSdk.msi
+
+
+After install, you should have paths like:
+
+C:\Program Files\Microsoft MPI\
+C:\Program Files (x86)\Microsoft SDKs\MPI\
+
+
+
+Step 3: Write MPI Code
+
+Create a file mpi_hello.c:
+
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+    
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    
+    printf("Hello from process %d of %d\n", world_rank, world_size);
+    
+    MPI_Finalize();
+    return 0;
+}
+
+https://visualstudio.microsoft.com/vs/community/
+Step 4: Compile the MPI Program
+
+In the x64 Native Tools Command Prompt, run:
+
+cl /I"C:\Program Files (x86)\Microsoft SDKs\MPI\Include" mpi_hello.c /link /LIBPATH:"C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64" msmpi.lib
+
+
+✅ Output:
+This generates mpi_hello.exe.
+
+Step 5: Run the MPI Program
+
+Execute with multiple processes:
+
+mpiexec -n 4 mpi_hello.exe
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

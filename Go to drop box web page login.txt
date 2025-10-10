@@ -1,0 +1,55 @@
+Go to drop box web page login,
+
+then go to dropbox.com/developers/apps
+create app and give permissions files.contents.write and files.contents.read
+now under settings generate access token
+
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dropbox File Upload Example</title>
+</head>
+<body>
+    <h2>Upload File to Dropbox</h2>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload to Dropbox</button>
+    <p id="status"></p>
+
+    <!-- Include Dropbox SDK -->
+    <script src="https://unpkg.com/dropbox/dist/Dropbox-sdk.min.js"></script>
+    <script>
+        // Replace this with your actual Access Token
+    const ACCESS_TOKEN = "sl.u.AGCRmO0HRyb_kUFuqSqn4dR0saxV-bT6NZdyFUYrvmSaWBPgHT6tBMiaQqV7pA_rNO2c3HeluE-u2MPZjcLqGkVOVdoegRh_L1yCXDht0vGAAycJGAW4eqKoT3Tnfibdf3Qh5gidfIXmILzHU7As-G5ODznbAE8BrTqku_abckNtXWQ5eJ2eoJyH2DLB0_t6ioQI9o6xTPJNUSnZhwArzltXfVpn0KY3WEL52FV2KJwwoPvAcEvsM21VR5-Yqe4BtD7Wr9jrdzPwKxHA2wuUpfmrrdzDOdvtRLSgS4KgBONrr9FId-DCwKfwhNCDj1UqspZP6Mgp2vtDXwUPaNxY-jj5LOSgSUCGW9uSI-6H4GZ1V7YlOp0mtreLH9wdhfsvV3PSen9ClwYwgT184UDu_M4iIo96D585-5aWJLYde4M2oKxncJWYfEDStq6gK0z4WXLlrSjkcmOPKM0wA4KsrlY7y7fVhzeuBEnFQf-UZdG91XF2dlylHbRwmiKZ4FlQMvNaEe8YeMhcf_c-UGriDaCC_-56-hXu5oWB7b-VZYytHJSvBgDewSRZHRaefmGhzUM9NjjsowVD41RV3aYucy6b8r1yS9UiIRy42K6ujm82gm38FpAr3z6puxHmk94bKmiE-uAGIg-gZXMuSPeMxvBNOVJ_rg6Q2XzfW-C19SQXzRVSzKSdKQey0n8qgtAjYRUq3W2eLNTfX8lFMwvKZqiM_0gjObbd3YAHPaSpSxXmeKDSPDlqHZsh_7VRuXHxxCqby2NOWwTfyvRoOVwO6FHB23vB9D7uKMNDcrSbs5a4wg1KGiVLGKxc7rhZqU5nrw_-ZdxtloI0M3JAakm8uo5CUEmHbTf3fYmFTRtwTVi7VWa1cjgRd6J7wu-YDXlrEQYjkW6WF3Zm_qKc5sB4P9tpSmfjSDjFuFooYRheVwu1FMj4Q9X2-P-6_uBteBGVt8XfSTgwE4fVQqoBaQa2EiTRn3xbYVIdNeZUBb8VVXrnMMeOAkefjhEodA-U7wh8YQcNZ8e0kiUtukGMu7OP9nbJ5du0Q67pkDQx-rXrCuq3uXW9WcQ8OY6IVMR1Ct2NpSIBrR7pM-szKPi8T8YrhGyuxV32AUO6tYuMDkMh3ise2rqWeGPRFeSTePcKXVB7UUXOwG3dcCNBaOB9fN5K3WL8U-NJAp9ySylML5N28KBy9Qu1K4wDSBD4klNfTtfHbiJpWKZYCFv9q4WWa1paryDmz2s0W_IGn5KprjgxcxJMDPLLnzXRq5LZmKOcWXkPCG1899ka3ieumhI4Kn-_MSVnxCEFwYldUiauc5yVPS2b_KGKSAJdSRi0GCoy0RPgueVLDhLbjN9yBgXYdmcFDMIed5QuxkOb74iOAyUQkbUGgmzv9FDLThSZ9ILWvXG0GTiNcMcooDVskyK-P0hVVnH-YK5HVOeKArxWuhOkYU7wJA";
+
+        const dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
+
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const status = document.getElementById('status');
+
+            if (!file) {
+                status.textContent = "Please select a file first.";
+                return;
+            }
+
+            const dropboxPath = '/' + file.name;
+
+            dbx.filesUpload({ path: dropboxPath, contents: file })
+                .then(response => {
+                    status.textContent = "File uploaded successfully!";
+                    console.log(response);
+                })
+                .catch(error => {
+                    status.textContent = "Error uploading file.";
+                    console.error(error);
+                });
+        }
+    </script>
+</body>
+</html>
+
+
+

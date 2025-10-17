@@ -1,68 +1,16 @@
-Perfect 👍 — let’s go through **OpenMPI** and **MPI (Message Passing Interface)** — what they are, how they work, and then how to **install and run MPI programs** step-by-step on **Ubuntu** for **single-node** and **multi-node** setups.
-
----
-
-# 🧠 1. WHAT IS MPI?
-
-**MPI (Message Passing Interface)** is a **standard** for **parallel programming** — used to run the same program across multiple processes that communicate via **messages**.
-
-It allows computers (or cores) to:
-
-* Share data,
-* Coordinate tasks,
-* Run large computations in parallel.
-
----
-
-# ⚙️ 2. WHAT IS OPENMPI?
-
-**OpenMPI** is a **popular open-source implementation** of the MPI standard.
-It’s a library that lets you run your C, C++, or Fortran programs using MPI functions.
-
-There are other implementations like:
-
-* MPICH
-* Intel MPI
-
-But **OpenMPI** is the most widely used in labs and clusters.
-
----
-
-# 💻 3. INSTALL OPENMPI ON UBUNTU (Single Node)
-
-Follow these steps carefully 👇
-
----
-
-## 🔹 Step 1: Update and Install
-
 ```bash
 sudo apt update
 sudo apt install openmpi-bin openmpi-common libopenmpi-dev -y
 ```
-
-✅ Check installation:
-
 ```bash
 mpicc --version
 ```
-
-Output example:
-
 ```
 mpicc (Open MPI) 4.1.5
 ```
-
----
-
-## 🔹 Step 2: Create a Sample MPI Program
-
-Create file:
-
 ```bash
 nano hello_mpi.c
 ```
-
 Paste:
 
 ```c
@@ -84,98 +32,34 @@ int main(int argc, char** argv) {
 
     MPI_Finalize();  // Finalize MPI
 }
-```
-
----
-
-## 🔹 Step 3: Compile the Program
 
 ```bash
 mpicc hello_mpi.c -o hello_mpi
 ```
-
----
-
-## 🔹 Step 4: Run the Program
-
-Run with **4 processes**:
-
 ```bash
 mpirun -np 4 ./hello_mpi
 ```
-
-✅ Output:
-
-```
-Hello from processor ubuntu, rank 0 out of 4 processors
-Hello from processor ubuntu, rank 1 out of 4 processors
-Hello from processor ubuntu, rank 2 out of 4 processors
-Hello from processor ubuntu, rank 3 out of 4 processors
-```
-
----
-
-# 🌐 4. MULTI-NODE OPENMPI CLUSTER (Multiple Machines)
-
-Now let’s run the **same MPI program** on multiple computers (nodes).
-
----
-
-## 🖥️ Cluster Setup Example
-
-| Node   | Role            | IP Address    |
-| ------ | --------------- | ------------- |
-| master | Controller node | 192.168.1.100 |
-| node1  | Worker 1        | 192.168.1.101 |
-| node2  | Worker 2        | 192.168.1.102 |
-
----
-
-## 🔹 Step 1: Install OpenMPI on All Nodes
-
 Run on **each machine**:
 
 ```bash
 sudo apt update
 sudo apt install openmpi-bin openmpi-common libopenmpi-dev -y
 ```
-
----
-
-## 🔹 Step 2: Enable SSH Access Between Nodes
-
-On the **master node**:
-
 ```bash
 ssh-keygen -t rsa -P ""
 ssh-copy-id user@node1
 ssh-copy-id user@node2
 ```
-
 ✅ Test:
 
 ```bash
 ssh node1
 ssh node2
 ```
-
-You should log in **without a password**.
-
----
-
-## 🔹 Step 3: Share Your Program
-
-From master:
-
 ```bash
 scp hello_mpi user@node1:/home/user/
 scp hello_mpi user@node2:/home/user/
 ```
-
----
-
-## 🔹 Step 4: Create a Host File
-
 On master:
 
 ```bash
@@ -190,46 +74,35 @@ node1 slots=2
 node2 slots=2
 ```
 
----
-
-## 🔹 Step 5: Run MPI Program Across Nodes
-
 On master:
 
 ```bash
 mpirun -np 6 --hostfile hosts.txt ./hello_mpi
 ```
 
-✅ Example Output:
 
-```
-Hello from processor master, rank 0 out of 6 processors
-Hello from processor node1, rank 1 out of 6 processors
-Hello from processor node2, rank 2 out of 6 processors
-Hello from processor node1, rank 3 out of 6 processors
-Hello from processor master, rank 4 out of 6 processors
-Hello from processor node2, rank 5 out of 6 processors
-```
 
----
 
-# 🧩 5. COMMON MPI COMMANDS
 
-| Command                              | Description                      |
-| ------------------------------------ | -------------------------------- |
-| `mpicc file.c -o file`               | Compile MPI program              |
-| `mpirun -np N ./file`                | Run with N processes             |
-| `mpirun --hostfile hosts.txt ./file` | Run across nodes                 |
-| `mpiexec`                            | Same as `mpirun`                 |
-| `ompi_info`                          | Check OpenMPI config and version |
 
----
 
-# ⚡ 6. BONUS: TEST PARALLEL SUM PROGRAM
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Here’s a simple parallel addition example:
 
-```c
+```sum.c
 #include <mpi.h>
 #include <stdio.h>
 
@@ -262,25 +135,3 @@ mpicc sum.c -o sum
 mpirun -np 4 ./sum
 ```
 
-✅ Output:
-
-```
-Total Sum = 55
-```
-
----
-
-# ✅ MPI SUMMARY
-
-| Feature           | Description                   |
-| ----------------- | ----------------------------- |
-| Library           | OpenMPI                       |
-| Programming Model | Distributed (message passing) |
-| Languages         | C, C++, Fortran               |
-| Run Mode          | Single or Multi-node          |
-| Key Commands      | `mpicc`, `mpirun`, `mpiexec`  |
-
----
-
-Would you like me to give you a **shell script (`install_openmpi.sh`)** that automatically installs OpenMPI and runs a sample program on Ubuntu?
-It’ll save time for lab setup and testing.
